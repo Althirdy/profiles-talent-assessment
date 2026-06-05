@@ -38,10 +38,15 @@ class DashboardController extends Controller
             return redirect()->route('login');
         }
 
+        // check if the user role is admin before allowing update
+        if($request->session()->get('user_role') !== 'admin') {
+            return redirect()->route('dashboard')->withErrors(['permission' => 'You do not have permission to perform this action.']);
+        }
+
         $validated = $request->validate([
-            'employee_name' => 'required|string|max:255',
-            'position' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
+            'employee_name' => 'required|string|max:100',
+            'position' => 'required|string|max:50',
+            'email' => 'required|email|max:100',
         ]);
 
         if ($this->employeeEmailExists($validated['email'])) {
@@ -71,6 +76,11 @@ class DashboardController extends Controller
     {
         if (!$request->session()->has('user_id')) {
             return redirect()->route('login');
+        }
+
+        // check if the user role is admin before allowing update
+        if($request->session()->get('user_role') !== 'admin') {
+            return redirect()->route('dashboard')->withErrors(['permission' => 'You do not have permission to perform this action.']);
         }
 
         if (!$this->employeeExists($id)) {
@@ -113,6 +123,11 @@ class DashboardController extends Controller
     {
         if (!$request->session()->has('user_id')) {
             return redirect()->route('login');
+        }
+
+        // check if the user role is admin before allowing deletion
+        if($request->session()->get('user_role') !== 'admin') {
+            return redirect()->route('dashboard')->withErrors(['permission' => 'You do not have permission to perform this action.']);
         }
 
         if (!$this->employeeExists($id)) {
