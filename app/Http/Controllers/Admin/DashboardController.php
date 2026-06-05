@@ -29,7 +29,7 @@ class DashboardController extends Controller
         $stmt->execute();
         $records = $stmt->fetchAll(\PDO::FETCH_OBJ);
 
-        return view('Admin.dashboard', compact('records'));
+        return $this->noCacheView('Admin.dashboard', compact('records'));
     }
 
     public function store(Request $request)
@@ -155,5 +155,14 @@ class DashboardController extends Controller
         $stmt->execute([':email' => $email]);
 
         return (bool) $stmt->fetch(\PDO::FETCH_OBJ);
+    }
+
+    private function noCacheView(string $view, array $data = [])
+    {
+        return response()
+            ->view($view, $data)
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', 'Sat, 01 Jan 1990 00:00:00 GMT');
     }
 }

@@ -17,11 +17,12 @@ class AuthController extends Controller
 
     public function showLogin(Request $request)
     {
+        //Before rendering the login page, check if the user is already authenticated
         if ($request->session()->has('user_id')) {
             return redirect()->route('dashboard');
         }
 
-        return view('Auth.login');
+        return $this->noCacheView('Auth.login');
     }
 
     public function showRegister(Request $request)
@@ -29,7 +30,7 @@ class AuthController extends Controller
         if ($request->session()->has('user_id')) {
             return redirect()->route('dashboard');
         }
-        return view('Auth.register');
+        return $this->noCacheView('Auth.register');
     }
 
     public function login(Request $request)
@@ -41,11 +42,14 @@ class AuthController extends Controller
 
         $stmt = $this->pdo->prepare("SELECT * FROM users WHERE email = :email LIMIT 1");
         $stmt->execute([':email' => $request->email]);
+
+        //Fetch the user as an object to access properties directly
         $user = $stmt->fetch(\PDO::FETCH_OBJ);
 
         if ($user && password_verify($request->password, $user->password)) {
             $request->session()->put('user_id', $user->id);
             $request->session()->put('user_name', $user->name);
+            //adding also the user role to the session for authorization purposes
             $request->session()->put('user_role', $user->role);
             $request->session()->regenerate();
 
@@ -96,5 +100,14 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
 
         return redirect()->route('login');
+    }
+
+    private function noCacheView(string $view)
+    {
+        return response()
+            ->view($view)
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', 'Sat, 01 Jan 1990 00:00:00 GMT');
     }
 }
