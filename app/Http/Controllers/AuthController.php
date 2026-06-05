@@ -46,6 +46,7 @@ class AuthController extends Controller
         if ($user && password_verify($request->password, $user->password)) {
             $request->session()->put('user_id', $user->id);
             $request->session()->put('user_name', $user->name);
+            $request->session()->put('user_role', $user->role);
             $request->session()->regenerate();
 
             return redirect()->route('dashboard');

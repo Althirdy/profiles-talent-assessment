@@ -40,17 +40,6 @@
             </div>
             @endif
 
-            <!-- Display Friendly Validation and Login Error Messages -->
-            @if($errors->any())
-            <div class="alert alert-danger py-2 small mb-3">
-                <ul class="mb-0 ps-3">
-                    @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-            @endif
-
             <!-- Form Handling: Uses POST method for sensitive data submission -->
             <form action="{{ route('login.post') }}" method="POST" class="needs-validation" novalidate>
                 <!-- Core Security Measure: CSRF Token Protection -->
@@ -59,13 +48,31 @@
                 <!-- Email Input Field -->
                 <div class="mb-3">
                     <label for="email" class="form-label small fw-semibold text-secondary">Email Address</label>
-                    <input type="email" name="email" id="email" class="form-control" value="{{ old('email') }}" required >
+                    <input type="email" name="email" id="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email') }}" required>
+                    <div class="invalid-feedback">
+                        @error('email')
+                            {{ $message }}
+                        @else
+                            Please enter a valid email address.
+                        @enderror
+                    </div>
                 </div>
 
                 <!-- Password Input Field -->
                 <div class="mb-4">
                     <label for="password" class="form-label small fw-semibold text-secondary">Password</label>
-                    <input type="password" name="password" id="password" class="form-control" required >
+                    <input type="password" name="password" id="password" class="form-control @if($errors->has('password') || $errors->has('error')) is-invalid @endif" required>
+                    <div class="invalid-feedback">
+                        @error('password')
+                            {{ $message }}
+                        @else
+                            @error('error')
+                                {{ $message }}
+                            @else
+                                Please enter your password.
+                            @enderror
+                        @enderror
+                    </div>
                 </div>
 
                 <!-- Action Button -->
@@ -78,18 +85,27 @@
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
     <script>
-        $(document).ready(function() {
-            $('.needs-validation').on('submit', function(event) {
-                // 'this' refers to the current form DOM element
-                if (!this.checkValidity()) {
+        document.querySelectorAll('.needs-validation').forEach(function(form) {
+            form.querySelectorAll('input').forEach(function(input) {
+                input.addEventListener('input', function() {
+                    input.classList.toggle('is-invalid', !input.checkValidity());
+                    input.classList.toggle('is-valid', input.checkValidity());
+                });
+            });
+
+            form.addEventListener('submit', function(event) {
+                form.querySelectorAll('input').forEach(function(input) {
+                    input.classList.toggle('is-invalid', !input.checkValidity());
+                    input.classList.toggle('is-valid', input.checkValidity());
+                });
+
+                if (!form.checkValidity()) {
                     event.preventDefault();
                     event.stopPropagation();
                 }
 
-                $(this).addClass('was-validated');
+                form.classList.add('was-validated');
             });
         });
     </script>

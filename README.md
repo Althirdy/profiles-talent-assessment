@@ -7,6 +7,7 @@ Profiles is a Laravel-based assessment project for a secure login, registration,
 - User registration
 - User login and logout using sessions
 - Protected dashboard for authenticated users
+- Role-based access control for admin and employee users
 - Employee CRUD: create, read, update, and delete records
 - Server-side form validation
 - Bootstrap 5 dashboard and forms
@@ -60,14 +61,30 @@ Email: admin@profiles.com
 Password: passwordAdmin123
 ```
 
+## Default Employee Account
+
+```text
+Email: juan@profiles.com
+Password: passwordUser123
+```
+
+## Role-Based Access Control
+
+The system uses a simple `role` field on the `users` table.
+
+- `admin`: can view the dashboard and create, update, or delete employee records.
+- `employee`: can log in and view employee records, but cannot create, update, or delete them.
+
+New registered users use the default non-admin role defined by the database migration.
+
 ## Database Structure
 
 The database schema is defined through Laravel migrations.
 
-- `users`: stores registered user accounts and hashed passwords.
+- `users`: stores registered user accounts, hashed passwords, and roles.
 - `employee_records`: stores employee name, position, and unique email records.
 
-Seed data is provided through `DatabaseSeeder`, including the default admin account and sample employee records.
+Seed data is provided through `DatabaseSeeder`, including default admin and employee accounts plus sample employee records.
 
 ## Security Notes
 
@@ -76,3 +93,4 @@ Seed data is provided through `DatabaseSeeder`, including the default admin acco
 - Authentication and employee CRUD queries use PDO prepared statements.
 - Forms are protected with Laravel CSRF tokens.
 - Dashboard and employee CRUD actions require an active login session.
+- Employee CRUD actions are restricted to admin users.

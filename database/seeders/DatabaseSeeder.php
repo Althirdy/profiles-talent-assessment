@@ -17,14 +17,26 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         //Admin user
-        $hashedPassword = password_hash('passwordAdmin123', PASSWORD_BCRYPT);
+        $AdminhashedPassword = password_hash('passwordAdmin123', PASSWORD_BCRYPT);
+        $UserhashedPassword = password_hash('passwordUser123', PASSWORD_BCRYPT);
 
         DB::table('users')->insert([
-            'name' => 'Administrator',
-            'email' => 'admin@profiles.com',
-            'password' => $hashedPassword,
-            'created_at' => now(),
-            'updated_at' => now(),
+            [
+                'name' => 'Administrator',
+                'email' => 'admin@profiles.com',
+                'password' => $AdminhashedPassword,
+                'role' => 'admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Juan Dela Cruz',
+                'email' => 'juan@profiles.com',
+                'password' => $UserhashedPassword,
+                'role' => 'employee',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
         ]);
 
         //Employee Records

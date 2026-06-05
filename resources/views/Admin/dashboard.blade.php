@@ -47,13 +47,18 @@
     <div class="container dashboard-container">
         <div class="row mb-4 align-items-center">
             <div class="col-md-8">
-                <h2 class="fw-bold text-dark mb-1">Employee Management Directory</h2>
-                <p class="text-muted small mb-0">Securely create, read, update, and delete company directory listings</p>
+                <h2 class="fw-bold text-dark mb-1">Employee Directory</h2>
+                @if (session('user_role') === 'admin')
+
+                    <p class="text-muted small mb-0">Securely create, read, update, and delete company directory listings</p>
+                @endif
             </div>
             <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                @if (session('user_role') === 'admin')
                 <button type="button" class="btn btn-primary fw-bold px-4" data-bs-toggle="modal" data-bs-target="#createRecordModal">
                     + Add New Employee
                 </button>
+                @endif
             </div>
         </div>
 
@@ -64,13 +69,9 @@
         </div>
         @endif
 
-        @if($errors->any())
+        @if($errors->has('record') || $errors->has('auth'))
         <div class="alert alert-danger border-0 shadow-sm mb-4">
-            <ul class="mb-0 ps-3 small">
-                @foreach($errors->all() as $error)
-                <li>{{ $error }}</li>
-                @endforeach
-            </ul>
+            {{ $errors->first('record') ?: $errors->first('auth') }}
         </div>
         @endif
 
@@ -84,7 +85,9 @@
                                 <th class="py-3 text-secondary text-uppercase small" style="width: 30%">Full Name</th>
                                 <th class="py-3 text-secondary text-uppercase small" style="width: 25%">Position</th>
                                 <th class="py-3 text-secondary text-uppercase small" style="width: 20%">Email</th>
+                                @if (session('user_role') === 'admin')
                                 <th class="pe-4 py-3 text-end text-secondary text-uppercase small" style="width: 15%">Actions</th>
+                                @endif
                             </tr>
                         </thead>
                         <tbody>
@@ -94,6 +97,7 @@
                                 <td class="fw-semibold text-dark">{{ $record->full_name }}</td>
                                 <td><span class="badge bg-light text-primary border border-primary-subtle px-2.5 py-1.5">{{ $record->position }}</span></td>
                                 <td class="text-muted small">{{ $record->email }}</td>
+                                @if (session('user_role') === 'admin')
                                 <td class="pe-4 text-end">
                                     <div class="d-inline-flex gap-2">
                                         <button type="button" class="btn btn-sm btn-outline-primary fw-semibold px-2.5" data-bs-toggle="modal" data-bs-target="#editRecordModal{{ $record->id }}">Edit</button>
@@ -105,7 +109,9 @@
                                         </form>
                                     </div>
                                 </td>
+                                @endif
                             </tr>
+                            @if(session('user_role') === 'admin')
                             <div class="modal fade" id="editRecordModal{{ $record->id }}" tabindex="-1" aria-labelledby="editRecordModalLabel{{ $record->id }}" aria-hidden="true">
                                 <div class="modal-dialog modal-dialog-centered">
                                     <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
@@ -120,17 +126,38 @@
 
                                                 <div class="mb-3">
                                                     <label for="employee_name_{{ $record->id }}" class="form-label small fw-semibold text-secondary">Full Name</label>
-                                                    <input type="text" name="employee_name" id="employee_name_{{ $record->id }}" class="form-control" value="{{ old('employee_name', $record->full_name) }}" required maxlength="255">
+                                                    <input type="text" name="employee_name" id="employee_name_{{ $record->id }}" class="form-control @error('employee_name') is-invalid @enderror" value="{{ old('employee_name', $record->full_name) }}" required maxlength="255">
+                                                    <div class="invalid-feedback">
+                                                        @error('employee_name')
+                                                            {{ $message }}
+                                                        @else
+                                                            Please enter the employee full name.
+                                                        @enderror
+                                                    </div>
                                                 </div>
 
                                                 <div class="mb-3">
                                                     <label for="position_{{ $record->id }}" class="form-label small fw-semibold text-secondary">Position</label>
-                                                    <input type="text" name="position" id="position_{{ $record->id }}" class="form-control" value="{{ old('position', $record->position) }}" required maxlength="255">
+                                                    <input type="text" name="position" id="position_{{ $record->id }}" class="form-control @error('position') is-invalid @enderror" value="{{ old('position', $record->position) }}" required maxlength="255">
+                                                    <div class="invalid-feedback">
+                                                        @error('position')
+                                                            {{ $message }}
+                                                        @else
+                                                            Please enter the employee position.
+                                                        @enderror
+                                                    </div>
                                                 </div>
 
                                                 <div class="mb-4">
                                                     <label for="email_{{ $record->id }}" class="form-label small fw-semibold text-secondary">Email Address</label>
-                                                    <input type="email" name="email" id="email_{{ $record->id }}" class="form-control" value="{{ old('email', $record->email) }}" required maxlength="255">
+                                                    <input type="email" name="email" id="email_{{ $record->id }}" class="form-control @error('email') is-invalid @enderror" value="{{ old('email', $record->email) }}" required maxlength="255">
+                                                    <div class="invalid-feedback">
+                                                        @error('email')
+                                                            {{ $message }}
+                                                        @else
+                                                            Please enter a valid email address.
+                                                        @enderror
+                                                    </div>
                                                 </div>
 
                                                 <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Save Changes</button>
@@ -139,6 +166,7 @@
                                     </div>
                                 </div>
                             </div>
+                            @endif
                             @empty
                             <tr>
                                 <td colspan="5" class="text-center py-5 text-muted">
@@ -152,7 +180,7 @@
             </div>
         </div>
     </div>
-
+    @if(session('user_role') === 'admin')
     <div class="modal fade" id="createRecordModal" tabindex="-1" aria-labelledby="createRecordModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
@@ -167,17 +195,38 @@
 
                         <div class="mb-3">
                             <label for="employee_name" class="form-label small fw-semibold text-secondary">Full Name</label>
-                            <input type="text" name="employee_name" id="employee_name" class="form-control" value="{{ old('employee_name') }}" required maxlength="255" >
+                            <input type="text" name="employee_name" id="employee_name" class="form-control @error('employee_name') is-invalid @enderror" value="{{ old('employee_name') }}" required maxlength="255">
+                            <div class="invalid-feedback">
+                                @error('employee_name')
+                                    {{ $message }}
+                                @else
+                                    Please enter the employee full name.
+                                @enderror
+                            </div>
                         </div>
 
                         <div class="mb-3">
                             <label for="position" class="form-label small fw-semibold text-secondary">Position</label>
-                            <input type="text" name="position" id="position" class="form-control" value="{{ old('position') }}" required maxlength="255" >
+                            <input type="text" name="position" id="position" class="form-control @error('position') is-invalid @enderror" value="{{ old('position') }}" required maxlength="255">
+                            <div class="invalid-feedback">
+                                @error('position')
+                                    {{ $message }}
+                                @else
+                                    Please enter the employee position.
+                                @enderror
+                            </div>
                         </div>
 
                         <div class="mb-4">
                             <label for="email" class="form-label small fw-semibold text-secondary">Email Address</label>
-                            <input type="email" name="email" id="email" class="form-control" value="{{ old('email') }}" required maxlength="255" >
+                            <input type="email" name="email" id="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email') }}" required maxlength="255">
+                            <div class="invalid-feedback">
+                                @error('email')
+                                    {{ $message }}
+                                @else
+                                    Please enter a valid email address.
+                                @enderror
+                            </div>
                         </div>
 
                         <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Create Employee</button>
@@ -186,11 +235,24 @@
             </div>
         </div>
     </div>
+    @endif
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.querySelectorAll('.needs-validation').forEach(function(form) {
+            form.querySelectorAll('input').forEach(function(input) {
+                input.addEventListener('input', function() {
+                    input.classList.toggle('is-invalid', !input.checkValidity());
+                    input.classList.toggle('is-valid', input.checkValidity());
+                });
+            });
+
             form.addEventListener('submit', function(event) {
+                form.querySelectorAll('input').forEach(function(input) {
+                    input.classList.toggle('is-invalid', !input.checkValidity());
+                    input.classList.toggle('is-valid', input.checkValidity());
+                });
+
                 if (!form.checkValidity()) {
                     event.preventDefault();
                     event.stopPropagation();
